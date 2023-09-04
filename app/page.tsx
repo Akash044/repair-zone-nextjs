@@ -1,24 +1,81 @@
 "use client";
 import { useEffect, useState } from "react";
-import Navbar from "@/components/navbar";
+import Navbar from "@/components/Navbar";
+import ServiceCard from "@/components/ServiceCard";
+import { useFilter } from "@/hooks/useFilter";
 
-// import Navbar from "components/Navbar";
+export interface IServices {
+  title: string;
+  symptoms: string;
+  category: string;
+  price: number;
+  cause: string;
+  img: string;
+  _id: string;
+}
+
 const Home = () => {
   const [categories, setCategories] = useState<string[]>([
+    "All",
     "AC",
     "Refrigerator",
   ]);
-  const [selectedCategories, setSelectedCategories] = useState<string>("AC");
-  const [services, setServices] = useState<Object[]>([]);
+  const [selectedCategories, setSelectedCategories] = useState<string>("All");
+  const [services, setServices] = useState<IServices[]>([]);
+  const [temp, setTemp] = useState<IServices[]>([]);
+  const [selectedItems, setSelectedItems] = useState<IServices[]>([]);
+  const [error, setError] = useState<string>("");
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
   useEffect(() => {
+    setIsLoading(true);
     fetch("https://repair-zone.onrender.com/allServices")
       .then((response) => response.json())
-      .then((data) => setServices(data));
+      .then((data) => {
+        setServices(data);
+        setTemp(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        setError(error.message);
+        setIsLoading(false);
+      });
+  }, []);
+
+  useEffect(() => {
+    setServices(useFilter(selectedCategories, temp));
+    setSelectedItems(useFilter(selectedCategories, temp));
   }, [selectedCategories]);
+
+  const onChangeSearch = (e: any) => {
+    setSearchQuery(e.target.value);
+    const searchText = e.target.value.toLowerCase();
+    const matchedItems = selectedItems.filter((item) => {
+      const itemName = item.title.toLowerCase();
+      return itemName.indexOf(searchText) > -1;
+    });
+    if (e.target.value === "") {
+      setServices(selectedItems);
+    } else {
+      setServices(matchedItems);
+    }
+  };
+
   return (
     <>
       <Navbar />
       <ul className="flex justify-end items-center gap-2">
+        <li>
+          <input
+            value={searchQuery}
+            type="text"
+            placeholder="search services..."
+            onChange={(e) => onChangeSearch(e)}
+            className="outline-none border-2 border-violet-400 rounded-2xl px-2 py-1"
+          />
+        </li>
         {categories.map((category, i) => (
           <li
             onClick={() => setSelectedCategories(category)}
@@ -31,36 +88,23 @@ const Home = () => {
           </li>
         ))}
       </ul>
-      <div className="grid grid-cols-4 gap-4 my-10">
-        {services
-          .filter((e) => e.category === selectedCategories)
-          .map((service, i) => (
-            <div className="max-w-sm rounded overflow-hidden shadow-lg">
-              <img
-                className="w-full h-[200px]"
-                src={`data:image/jpeg;base64,${service.img}`}
-                alt="Sunset in the mountains"
-              />
-              <div className="px-6 py-4">
-                <div className="font-bold text-xl mb-2">{service.title}</div>
-                <div className="font-bold text-md mb-2">
-                  category: {service.category}
-                </div>
-                <p className="text-gray-700 text-base">{service.cause}</p>
-                <p className="text-gray-700 text-base my-4">
-                  {service.symptoms}
-                </p>
-                {/* ---------------------------------------------------- */}
-
-                {/* ------------------------------------------------------- */}
-              </div>
-              <div className="px-6 pt-4 pb-2">
-                <span className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2 mb-2">
-                  Service Charge: {service.price}
-                </span>
-              </div>
-            </div>
+      <div className="flex justify-center items-center">
+        {error.length > 0 && (
+          <h3>{error} the data. Please check your internet connection.</h3>
+        )}
+      </div>
+      <div className="flex justify-center items-center">
+        {isLoading && <h3>Loading....</h3>}
+      </div>
+      <div className="grid grid-cols-4 gap-6 my-10">
+        {!error.length &&
+          // searchResult.length === 0 &&
+          services.map((service, i) => (
+            <ServiceCard key={service._id} ser={service} />
           ))}
+        {/* {searchResult.map((service, i) => (
+          <ServiceCard key={service._id} ser={service} />
+        ))} */}
       </div>
     </>
   );
