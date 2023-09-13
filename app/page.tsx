@@ -1,6 +1,5 @@
 "use client";
 import { useEffect, useState } from "react";
-import Navbar from "@/components/Navbar";
 import ServiceCard from "@/components/ServiceCard";
 import { useFilter } from "@/hooks/useFilter";
 
@@ -65,7 +64,6 @@ const Home = () => {
 
   return (
     <>
-      <Navbar />
       <ul className="flex justify-end items-center gap-2">
         <li>
           <input
