@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import ServiceCard from "@/components/ServiceCard";
 import { useFilter } from "@/hooks/useFilter";
+import useAsync from "@/hooks/useAsync";
+import RepairServices from "@/services/RepairServices";
 
 export interface IServices {
   title: string;
@@ -20,28 +22,20 @@ const Home = () => {
     "Refrigerator",
   ]);
   const [selectedCategories, setSelectedCategories] = useState<string>("All");
-  const [services, setServices] = useState<IServices[]>([]);
-  const [temp, setTemp] = useState<IServices[]>([]);
-  const [selectedItems, setSelectedItems] = useState<IServices[]>([]);
-  const [error, setError] = useState<string>("");
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [services, setServices] = useState<IServices[] | null>([]);
+  const [temp, setTemp] = useState<IServices[] | null>([]);
+  const [selectedItems, setSelectedItems] = useState<IServices[] | null>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
+  const { data, isLoading, isSuccess, isError, error } = useAsync(
+    RepairServices.getServices
+  );
+  console.log(data);
+
   useEffect(() => {
-    setIsLoading(true);
-    fetch("https://repair-zone.onrender.com/allServices")
-      .then((response) => response.json())
-      .then((data) => {
-        setServices(data);
-        setTemp(data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        setError(error.message);
-        setIsLoading(false);
-      });
-  }, []);
+    setServices(data);
+    setTemp(data);
+  }, [data]);
 
   useEffect(() => {
     setServices(useFilter(selectedCategories, temp));

@@ -1,30 +1,30 @@
 import { IServices } from "@/app/page";
 import { useEffect, useState } from "react";
 
-// const useAsync = <T>(requestFunc: () => Promise<T>) => {
-const useAsync = <T>(url: string) => {
-  const [data, setData] = useState<IServices[]>([]);
+type statusType = "idle" | "pending" | "success" | "error";
+
+const useAsync = <T>(requestFunc: () => Promise<T>) => {
+  const [data, setData] = useState<T | null>(null);
   const [error, setError] = useState<string>("");
-  const [status, setStatus] = useState<string>("idle");
+  const [status, setStatus] = useState<statusType>("idle");
 
   useEffect(() => {
     setStatus("pending");
-    fetch(url)
-      .then((res) => res.json())
+    requestFunc()
       .then((data) => {
         setData(data);
-        setStatus("successful");
+        setStatus("success");
       })
       .catch((error) => {
         setStatus("error");
         setError(error.message);
       });
-  }, [url]);
+  }, [requestFunc]);
 
   return {
     data,
     isLoading: status === "pending",
-    isSuccess: status === "successful",
+    isSuccess: status === "success",
     isError: status === "error",
     error,
   };
