@@ -4,16 +4,10 @@ import ServiceCard from "@/components/ServiceCard";
 import { useFilter } from "@/hooks/useFilter";
 import useAsync from "@/hooks/useAsync";
 import RepairServices from "@/services/RepairServices";
-
-export interface IServices {
-  title: string;
-  symptoms: string;
-  category: string;
-  price: number;
-  cause: string;
-  img: string;
-  _id: string;
-}
+import { useDispatch, useSelector } from "react-redux";
+import loadServicesData from "@/redux/middlewares/loadServicesData";
+import { IFetchData, getServices } from "@/redux/slices/loadServicesSlice";
+import { IReducers, IServices } from "@/type";
 
 const Home = () => {
   const [categories, setCategories] = useState<string[]>([
@@ -22,23 +16,28 @@ const Home = () => {
     "Refrigerator",
   ]);
   const [selectedCategories, setSelectedCategories] = useState<string>("All");
-  const [services, setServices] = useState<IServices[] | null>([]);
-  const [temp, setTemp] = useState<IServices[] | null>([]);
-  const [selectedItems, setSelectedItems] = useState<IServices[] | null>([]);
+  const [serviceData, setServiceData] = useState<IServices[]>([]);
+  const [temp, setTemp] = useState<IServices[]>([]);
+  const [selectedItems, setSelectedItems] = useState<IServices[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
 
-  const { data, isLoading, isSuccess, isError, error } = useAsync(
-    RepairServices.getServices
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getServices());
+  }, [getServices]);
+
+  const { services, isError, isLoading, error } = useSelector(
+    (state: IReducers) => state.loadServices
   );
-  console.log(data);
 
   useEffect(() => {
-    setServices(data);
-    setTemp(data);
-  }, [data]);
+    setServiceData(services);
+    setTemp(services);
+  }, [services]);
 
   useEffect(() => {
-    setServices(useFilter(selectedCategories, temp));
+    setServiceData(useFilter(selectedCategories, temp));
     setSelectedItems(useFilter(selectedCategories, temp));
   }, [selectedCategories]);
 
@@ -50,9 +49,9 @@ const Home = () => {
       return itemName.indexOf(searchText) > -1;
     });
     if (e.target.value === "") {
-      setServices(selectedItems);
+      setServiceData(selectedItems);
     } else {
-      setServices(matchedItems);
+      setServiceData(matchedItems);
     }
   };
 
@@ -91,7 +90,7 @@ const Home = () => {
       <div className="grid grid-cols-4 gap-6 my-10">
         {!error.length &&
           // searchResult.length === 0 &&
-          services.map((service, i) => (
+          serviceData.map((service, i) => (
             <ServiceCard key={service._id} ser={service} />
           ))}
         {/* {searchResult.map((service, i) => (

@@ -1,11 +1,8 @@
-import { IServices } from "@/app/page";
+import { IServices } from "@/type";
 
-export const useFilter = (
-  selectedCategories: string,
-  data: IServices[] | null
-) => {
+export const useFilter = (selectedCategories: string, data: IServices[]) => {
   if (selectedCategories != "All") {
-    const filteredServices: IServices[] | null = data.filter(
+    const filteredServices: IServices[] = data.filter(
       (ser) => ser.category === selectedCategories
     );
     return filteredServices;

@@ -1,7 +1,7 @@
-import { IServices } from "@/app/page";
+import { IServices } from "@/type";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-const initialState: IServices[] = [{} as IServices];
+const initialState: IServices[] = [];
 
 const serviceSlice = createSlice({
   name: "service",

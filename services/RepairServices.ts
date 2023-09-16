@@ -1,4 +1,4 @@
-import { IServices } from "@/app/page";
+import { IServices } from "@/type";
 import requestServices from "./httpServices";
 
 class RepairServices {

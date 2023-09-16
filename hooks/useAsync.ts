@@ -1,4 +1,4 @@
-import { IServices } from "@/app/page";
+import { IServices } from "@/type";
 import { useEffect, useState } from "react";
 
 type statusType = "idle" | "pending" | "success" | "error";
